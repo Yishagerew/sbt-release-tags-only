@@ -1,3 +1,5 @@
+[![Maven Central](https://img.shields.io/maven-central/v/fr.qux/sbt-release-tags-only.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22fr.qux%22%20AND%20a:%22sbt-release-tags-only%22)
+
 # sbt-release-tags-only
 A small extension to sbt-release, to support version tracking purely through Git tags, without the need for commits
 to a `version.sbt` file.  Natively supports independently versioned multi-module projects.

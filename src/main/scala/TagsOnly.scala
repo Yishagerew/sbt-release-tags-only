@@ -1,17 +1,17 @@
 package sbtrelease.tagsonly
 
 import sbt.Keys.{name, version}
-import sbt.{AutoPlugin, Project, Setting, State, settingKey}
+import sbt.{settingKey, AutoPlugin, PluginTrigger, Plugins, Project, Setting, State}
 import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys.versions
-import sbtrelease.ReleasePlugin.autoImport.{releaseVersionBump, _}
+import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.ReleaseStateTransformations.reapply
 import sbtrelease.{ReleasePlugin, Vcs, Version}
 
 object TagsOnlyPlugin extends AutoPlugin {
 
-  override def requires = ReleasePlugin
+  override def requires: Plugins = ReleasePlugin
 
-  override def trigger = allRequirements
+  override def trigger: PluginTrigger = allRequirements
 
   object autoImport {
     val releaseTagPrefix = settingKey[String]("Prefix to use for tags")
@@ -24,7 +24,6 @@ object TagsOnlyPlugin extends AutoPlugin {
   override lazy val projectSettings = Seq[Setting[_]](
     // Defaults for this plugin
     releaseTagPrefix := s"${name.value}",
-
     // Provide new defaults for some settings of the main `sbtrelease` plugin
     releaseUseGlobalVersion := false,
     releaseVersionBump := Version.Bump.Minor,
@@ -35,39 +34,40 @@ object TagsOnlyPlugin extends AutoPlugin {
 
 object TagsOnly {
   def setVersionFromTags(tagPrefix: String): ReleaseStep = { st: State =>
-    val bumpVersion = Function.chain(Seq(
-      Project.extract(st).runTask(releaseNextVersion, st)._2,
-      Project.extract(st).runTask(releaseVersion, st)._2))
+    val bumpVersion = Function.chain(
+      Seq(
+        Project.extract(st).runTask(releaseNextVersion, st)._2,
+        Project.extract(st).runTask(releaseVersion, st)._2
+      )
+    )
 
-    val git = getGit(st)
+    val git            = getGit(st)
     val gitDescribeCmd = git.cmd("describe", "--match", s"$tagPrefix-*")
     val gitDescription = gitDescribeCmd.! match {
-      case 0 => {
+      case 0 =>
         st.log.info("Found existing tag matching the module name")
         git.cmd("describe", "--match", s"$tagPrefix-*").!!.trim
-      }
-      case 128 => {
+      case 128 =>
         st.log.info("No existing tags matching the module name were found")
         s"$tagPrefix-0.0.0-auto-generated-initial-tag"
-      }
-      case _ => {
+      case _ =>
         throw new RuntimeException(s"Unexpected failure running $gitDescribeCmd")
-      }
     }
     st.log.info("Most recent tag matching the module was '%s'" format gitDescription)
 
     val versionRegex = s"$tagPrefix-([0-9]+.[0-9]+.[0-9]+)-?(.*)?".r
     val versionToRelease = gitDescription match {
-      case versionRegex(v, "") => v                   // No changes since last release
-      case versionRegex(v, _) => s"${bumpVersion(v)}" // new version, bumped according to our chosen strategy
-      case _ => sys.error(s"Tag '$gitDescription' failed to match expected format '$versionRegex'")
+      case versionRegex(v, "") => v // No changes since last release
+      case versionRegex(v, _)  => s"${bumpVersion(v)}" // new version, bumped according to our chosen strategy
+      case _                   => sys.error(s"Tag '$gitDescription' failed to match expected format '$versionRegex'")
     }
     st.log.info("Setting release version to '%s'." format versionToRelease)
 
     st.put(versions, (versionToRelease, "unused 'next version' field"))
-    reapply(Seq(
-      version := versionToRelease
-    ), st)
+    reapply(
+      Seq(version := versionToRelease),
+      st
+    )
   }
 
   // The standard `pushChanges` release step relies on an upstream being configured.  This doesn't.
@@ -77,7 +77,9 @@ object TagsOnly {
     st
   }
 
-  def getGit(st: State): Vcs = {
-    Project.extract(st).get(releaseVcs).getOrElse(sys.error("Aborting release. Working directory is not a Git repository."))
-  }
+  def getGit(st: State): Vcs =
+    Project
+      .extract(st)
+      .get(releaseVcs)
+      .getOrElse(sys.error("Aborting release. Working directory is not a Git repository."))
 }

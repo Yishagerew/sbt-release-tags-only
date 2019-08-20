@@ -12,10 +12,10 @@ ThisBuild / scmInfo := Some(
 )
 ThisBuild / developers := List(
   Developer(
-    id    = "dimitriho",
-    name  = "Dimitri Ho",
+    id = "dimitriho",
+    name = "Dimitri Ho",
     email = "dimitri.ho@gmail.com",
-    url   = url("http://qux.fr")
+    url = url("http://qux.fr")
   )
 )
 
@@ -24,7 +24,9 @@ ThisBuild / licenses := List("Apache 2" -> new URL("http://www.apache.org/licens
 ThisBuild / homepage := Some(url("https://github.com/dimitriho/sbt-release-tags-only"))
 
 // Remove all additional repository other than Maven Central from POM
-ThisBuild / pomIncludeRepository := { _ => false }
+ThisBuild / pomIncludeRepository := { _ =>
+  false
+}
 ThisBuild / publishTo := {
   val nexus = "https://oss.sonatype.org/"
   if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
