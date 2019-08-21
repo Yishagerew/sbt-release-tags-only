@@ -1,10 +1,10 @@
 package sbtrelease.tagsonly
 
-import sbt.Keys.{name, version}
+import sbt.Keys._
 import sbt._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys.versions
 import sbtrelease.ReleasePlugin.autoImport._
-import sbtrelease.ReleaseStateTransformations.{checkSnapshotDependencies, reapply, runClean, tagRelease}
+import sbtrelease.ReleaseStateTransformations._
 import sbtrelease.tagsonly.TagsOnly.{pushTagsOnly, setVersionFromTags}
 import sbtrelease.{ExtraReleaseCommands, ReleasePlugin, Vcs, Version}
 
@@ -17,7 +17,7 @@ object TagsOnlyPlugin extends AutoPlugin {
   object autoImport {
     val releaseTagPrefix = settingKey[String]("Prefix to use for tags")
 
-    val publishStep = settingKey[ReleaseStep]("")
+    val publishStepTask = settingKey[TaskKey[Unit]]("Task for the publish step (default: publish)")
 
     lazy val TagsOnly = sbtrelease.tagsonly.TagsOnly
   }
@@ -25,9 +25,9 @@ object TagsOnlyPlugin extends AutoPlugin {
   import autoImport._
 
   override lazy val projectSettings = Seq[Setting[_]](
-    publishStep := releaseStepCommandAndRemaining("^ publish"),
+    publishStepTask := publish,
     // Defaults for this plugin
-    releaseTagPrefix := s"${name.value}",
+    releaseTagPrefix := name.value,
     // Provide new defaults for some settings of the main `sbtrelease` plugin
     releaseUseGlobalVersion := false,
     releaseVersionBump := Version.Bump.Minor,
@@ -39,7 +39,7 @@ object TagsOnlyPlugin extends AutoPlugin {
       setVersionFromTags(releaseTagPrefix.value),
       runClean,
       tagRelease,
-      publishStep.value,
+      releaseStepTask(publishStepTask.value),
       pushTagsOnly
     )
   )

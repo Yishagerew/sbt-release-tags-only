@@ -1,3 +1,5 @@
+import PgpKeys.publishSigned
+
 lazy val `sbt-release-tags-only` = project in file(".")
 
 name := "sbt-release-tags-only"
@@ -10,4 +12,4 @@ sbtPlugin := true
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.11")
 
 // Release
-publishStep := releaseStepCommandAndRemaining("^ publishSigned")
+publishStepTask := publishSigned
