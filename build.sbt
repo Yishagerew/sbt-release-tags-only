@@ -10,15 +10,4 @@ sbtPlugin := true
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.11")
 
 // Release
-import sbtrelease.ExtraReleaseCommands
-import ReleaseTransformations._
-import TagsOnly._
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  releaseStepCommand(ExtraReleaseCommands.initialVcsChecksCommand),
-  setVersionFromTags(releaseTagPrefix.value),
-  runClean,
-  tagRelease,
-  releaseStepCommandAndRemaining("^ publishSigned"),
-  pushTagsOnly
-)
+publishStep := releaseStepCommandAndRemaining("^ publishSigned")
