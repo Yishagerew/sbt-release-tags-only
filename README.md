@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/fr.qux/sbt-release-tags-only.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22fr.qux%22%20AND%20a:%22sbt-release-tags-only%22)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/fr.qux/sbt-release-tags-only/badge.svg?kill_cache=1)](https://search.maven.org/artifact/fr.qux/sbt-release-tags-only/)
 
 # sbt-release-tags-only
 A small extension to sbt-release, to support version tracking purely through Git tags, without the need for commits
@@ -7,7 +7,7 @@ to a `version.sbt` file.  Natively supports independently versioned multi-module
 ### Using it
 1.  Add the plugin:
     ```sbt
-    addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.7")
+    addSbtPlugin("fr.qux" % "sbt-release-tags-only" % "0.5.0")
     ```
 2.  Define your release process, including the relevant tasks:
     ```sbt
